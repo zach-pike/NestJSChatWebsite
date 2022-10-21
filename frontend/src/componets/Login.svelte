@@ -8,7 +8,9 @@
   let show_prompt = false;
 
   async function login() {
+    console.log({ username, password })
     token = await api.getToken(username, password);
+    console.log(token);
     show_prompt = true;
   }
 </script>

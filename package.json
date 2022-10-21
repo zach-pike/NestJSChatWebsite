@@ -28,6 +28,7 @@
     "@nestjs/platform-ws": "^9.1.4",
     "@nestjs/serve-static": "^3.0.0",
     "@nestjs/websockets": "^9.1.4",
+    "@types/jsonwebtoken": "^8.5.9",
     "jsonwebtoken": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

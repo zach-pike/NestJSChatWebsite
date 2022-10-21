@@ -19,10 +19,12 @@ export class AuthService {
       u.username == username && u.password == password
     );
     if (user == null) return [ new Error("Could not find user"), null ];
+
     const object: UserJWTObject = {
       username: user.username,
       uuid: user.uuid
     }
+
     const key = JWT.sign(object, this.signature_key);
 
     return [ null, key ];
@@ -30,7 +32,7 @@ export class AuthService {
 
   checkJWTBearer<T = UserJWTObject>(token: string): T | undefined {
     try {
-      return JWT.verify(token.replace("Bearer ", ""), this.signature_key);
+      return JWT.verify(token.replace("Bearer ", ""), this.signature_key) as T;
     } catch(e) {
       return null;
     }

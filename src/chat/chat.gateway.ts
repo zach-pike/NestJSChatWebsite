@@ -1,7 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { AuthService } from '../auth/auth.service';
-import { Post } from './chat.service';
 
 import {
   WebSocketServer,

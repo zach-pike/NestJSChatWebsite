@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-export interface Post {
-  author: string;
-  content: string;
-}
+import { Post } from './chat.types';
 
 @Injectable()
 export class ChatService {

@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 import { readable } from 'svelte/store';
+import type { Post } from '../../../src/chat/chat.types';
 
-export async function getToken(username: string, password: string)
-  : string | undefined {
+export async function getToken(username: string, password: string): Promise<string | undefined> {
   let req = await fetch(`${window.location.origin}/auth/login`, {
     method: "POST",
     headers: {
@@ -19,6 +19,7 @@ export async function getToken(username: string, password: string)
   return await req.text();
 }
 
+// Get a authenticated socket.io client instance
 export function getSIOClient(token: string): Socket {
   return io(window.location.origin, {
     extraHeaders: {
@@ -28,8 +29,8 @@ export function getSIOClient(token: string): Socket {
 }
 
 export function getMessageReadable(client: Socket) {
-  return readable([], (set) => {
-    let values = [];
+  return readable<Post[]>([], (set) => {
+    let values: Post[] = [];
 
     fetch(`${window.location.origin}/chat/getsent`)
       .then(v => v.json())
@@ -38,7 +39,7 @@ export function getMessageReadable(client: Socket) {
         set(values.reverse());
       });
     
-    let recv_func = (msg) => {
+    let recv_func = (msg: Post) => {
       values.push(msg);
       set(values.reverse());
     }

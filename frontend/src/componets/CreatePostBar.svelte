@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Socket } from 'socket.io-client';
+  import type { Socket } from 'socket.io-client';
   import * as api from '../api/apiClient';
   
   export let socket: Socket;

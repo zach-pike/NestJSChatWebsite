@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getMessageReadable } from './apiClient';
-  import { Socket } from 'socket.io-client';
+  import { getMessageReadable } from '../api/apiClient';
+  import type { Socket } from 'socket.io-client';
 
   export let socket: Socket;
   
