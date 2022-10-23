@@ -23,6 +23,7 @@
     "vite": "^3.1.8"
   },
   "dependencies": {
+    "jwt-decode": "^3.1.2",
     "socket.io-client": "^4.5.3",
     "svelte-router-spa": "^6.0.3"
   }

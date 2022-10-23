@@ -1,6 +1,10 @@
-import HomeSvelte from "./pages/Home.svelte";
+import HomeLayout from "./Layouts/HomeLayout.svelte";
+import HomePage from "./pages/HomePage.svelte";
 import Login from "./pages/Login.svelte";
 import Signup from "./pages/Signup.svelte";
+import PrivateMessages from "./pages/PrivateMessages.svelte";
+import VideoStreamer from "./pages/VideoStreamer.svelte";
+import PublicChat from "./pages/PublicChat.svelte";
 
 export const routes = [
     {
@@ -13,6 +17,19 @@ export const routes = [
     },
     {
         name: "/home",
-        component: HomeSvelte
+        component: HomePage,
+        layout: HomeLayout
+    },
+    {
+        name: "/pc",
+        component: PublicChat
+    },
+    {
+        name: "/pms",
+        component: PrivateMessages
+    },
+    {
+        name: "/streamer",
+        component: VideoStreamer
     }
 ]

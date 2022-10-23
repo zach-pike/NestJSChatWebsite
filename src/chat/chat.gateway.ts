@@ -23,7 +23,7 @@ export class ChatGateway {
   server: Server;
   
   @SubscribeMessage('message')
-  handleMessage(
+  async handleMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() content: string
   ) {
@@ -32,11 +32,12 @@ export class ChatGateway {
     let user = this.authService.checkJWTBearer(auth);
     if (user == null) return;
 
-    this.chatService.addMessage({
+    this.server.emit('message', {
       author: user.username,
       content
     });
-    this.server.emit('message', {
+
+    await this.chatService.addMessage({
       author: user.username,
       content
     });

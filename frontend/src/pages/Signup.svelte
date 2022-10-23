@@ -14,7 +14,7 @@
 
 </script>
 
-<div class="m-4 w-full h-screen flex justify-center items-center p-0 m-0">
+<div class="w-full h-screen flex justify-center items-center p-0 m-0">
     <div class="h-fit">
       <h1 class="text-2xl">Sign up</h1>
       <div class="w-80">

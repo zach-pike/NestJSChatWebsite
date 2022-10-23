@@ -1,6 +1,7 @@
 export interface UserJWTObject {
   username: string;
   uuid: string;
+  admin: boolean;
 }
 
 export class AuthInfoDTO {
@@ -18,4 +19,5 @@ export interface User {
   username: string;
   real_name: string;
   password_hash: string;
+  admin: boolean;
 }

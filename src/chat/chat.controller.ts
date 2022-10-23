@@ -8,7 +8,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
   
   @Get("getsent")
-  getMessages() {
-    return this.chatService.getAllMessages();
+  async getMessages() {
+    return await this.chatService.getAllMessages();
   }
 }

@@ -24,7 +24,8 @@ export class AuthService {
 
     let jwt_obj: UserJWTObject = {
       username: user.username,
-      uuid: id
+      uuid: id,
+      admin: user.admin
     }
 
     const key = JWT.sign(jwt_obj, this.signature_key);
@@ -39,7 +40,8 @@ export class AuthService {
     let user: User = {
       username,
       real_name,
-      password_hash: hash
+      password_hash: hash,
+      admin: false
     }
 
     await database.collection("users").add(user);
