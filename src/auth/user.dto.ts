@@ -8,8 +8,14 @@ export class AuthInfoDTO {
   password: string;
 }
 
+export class SignupInfoDTO {
+  username: string;
+  real_name: string;
+  password: string;
+}
+
 export interface User {
   username: string;
-  password: string;
-  uuid:     string;
+  real_name: string;
+  password_hash: string;
 }

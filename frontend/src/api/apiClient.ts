@@ -2,6 +2,20 @@ import { io, Socket } from 'socket.io-client';
 import { readable } from 'svelte/store';
 import type { Post } from '../../../src/chat/chat.types';
 
+export async function register_user(username: string, real_name: string, password: string) {
+  let req = await fetch(`${window.location.origin}/auth/signup`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username,
+      password,
+      real_name
+    })
+  });
+}
+
 export async function getToken(username: string, password: string): Promise<string | undefined> {
   let req = await fetch(`${window.location.origin}/auth/login`, {
     method: "POST",
@@ -21,6 +35,7 @@ export async function getToken(username: string, password: string): Promise<stri
 
 // Get a authenticated socket.io client instance
 export function getSIOClient(token: string): Socket {
+  console.log("new client created")
   return io(window.location.origin, {
     extraHeaders: {
       Authorization: `Bearer ${token}`
