@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/commo
 import { AuthService } from './auth.service';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(@Inject(AuthService) private readonly authService: AuthService) {}
   
   canActivate(ctx: ExecutionContext): boolean {
@@ -12,6 +12,6 @@ export class AuthGuard implements CanActivate {
 
     let user = this.authService.checkJWTBearer(token.replace("Bearer ", ""));
 
-    return user != null;
+    return user != null && user.admin == true;
   }
 }

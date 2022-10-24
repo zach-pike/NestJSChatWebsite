@@ -3,13 +3,14 @@
   import { getMessageReadable } from '../api/apiClient';
   import type { Socket } from 'socket.io-client';
   import ChatMessage from './ChatMessage.svelte';
+  import { token } from "../stores"
 
   export let socket: Socket;
   
   let messages = null;
 
   onMount(() => {
-    messages = getMessageReadable(socket);
+    messages = getMessageReadable(socket, $token);
   })
 </script>
 

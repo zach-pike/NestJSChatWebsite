@@ -5,23 +5,22 @@
   
   let username: string;
   let password: string;
-  let tok: string;
-
-  let show_prompt = false;
+  let error = "";
 
   async function login() {
-    tok = await api.getToken(username, password);
-    show_prompt = true;
+    let [ err, tok ] = await api.getToken(username, password);
 
     if (tok != null) {
       token.set(tok);
       localStorage.setItem('token', tok);
       navigateTo("/home")
+    } else {
+      error = err.message;
     }
   }
 </script>
 
-<div class="m-4 w-full h-screen flex justify-center items-center p-0 m-0">
+<div class="w-full h-screen flex justify-center items-center p-0 m-0">
   <div class="h-fit">
     <h1 class="text-2xl">Login</h1>
     <div class="w-80">
@@ -30,16 +29,8 @@
       <div class="flex items-center">
         <button class="px-3 py-1 border border-1 border-gray-700 rounded bg-gray-50 hover:bg-gray-100 mr-2" on:click={() => login()}>Login</button>
         <a href="/signup" class="underline">Sign up</a>
+        
       </div>
-      
     </div>
   </div>
 </div>
-
-{#if show_prompt == true}
-  {#if token == null}
-    <p>Incorrect password!</p>
-  {:else}
-    <p>{tok}</p>
-  {/if}
-{/if}
