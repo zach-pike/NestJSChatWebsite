@@ -4,6 +4,10 @@ export interface UserJWTObject {
   admin: boolean;
 }
 
+export interface JWTRefreshObject {
+  uuid: string;
+}
+
 export class AuthInfoDTO {
   username: string;
   password: string;

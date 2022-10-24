@@ -10,7 +10,7 @@ export class AuthGuard implements CanActivate {
 
     let token = req.headers["authorization"] || "";
 
-    let user = this.authService.checkJWTBearer(token.replace("Bearer ", ""));
+    let user = this.authService.checkJWTBearer(token);
 
     return user != null;
   }

@@ -1,22 +1,18 @@
 <script lang="ts">
-  import * as api from "../api/apiClient";
-  import { token } from "../stores";
-  import { navigateTo } from 'svelte-router-spa'
+  import { initialize_token, tokenReadable, initialize_token_from_localstorage } from "../api/apiClient";
+  import { navigateTo } from 'svelte-router-spa';
   
   let username: string;
   let password: string;
-  let error = "";
+
+  let v = initialize_token_from_localstorage();
+
+  if (v) navigateTo('/home');
 
   async function login() {
-    let [ err, tok ] = await api.getToken(username, password);
+    let err = await initialize_token(username, password);
 
-    if (tok != null) {
-      token.set(tok);
-      localStorage.setItem('token', tok);
-      navigateTo("/home")
-    } else {
-      error = err.message;
-    }
+    if (!err) navigateTo("/home");
   }
 </script>
 

@@ -1,23 +1,15 @@
-import type { async } from 'rxjs';
+import jwt_decode from "jwt-decode"
 import { io, Socket } from 'socket.io-client';
-import { readable, type Readable } from 'svelte/store';
+import { writable, readable, type Readable } from 'svelte/store';
 import type { Post } from '../../../src/chat/chat.types';
 
-export async function register_user(username: string, real_name: string, password: string) {
-  let req = await fetch(`${window.location.origin}/auth/signup`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username,
-      password,
-      real_name
-    })
-  });
+type Tokens = { accessToken:string, refreshToken:string };
+
+export function get_user(token: string): { username: string, admin: boolean } {
+  return jwt_decode(token);
 }
 
-export async function getToken(username: string, password: string): Promise<[ Error, string ]> {
+async function get_tokens(username: string, password: string): Promise<[ Error, Tokens ]> {
   let req = await fetch(`${window.location.origin}/auth/login`, {
     method: "POST",
     headers: {
@@ -33,7 +25,99 @@ export async function getToken(username: string, password: string): Promise<[ Er
     return [ new Error(await req.text()), null ];
   }
 
-  return [ null, await req.text() ]
+  return [ null, await req.json() ];
+}
+
+async function get_refresh(refreshToken: string): Promise<string> {
+  let req = await fetch(`${window.location.origin}/auth/refresh`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      refreshToken
+    })
+  })
+
+  let json = await req.json();
+
+  return json.accessToken;
+}
+
+export let tokenReadable: Readable<string> = null;
+
+function _init_token(accessToken: string, refreshToken: string) {
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+  
+  function calculate_timeout_time(exp: number): number {
+    return ((exp * 1000) - new Date().getTime()) - 60000;
+  }
+  
+  tokenReadable = readable(null, (set) => {
+    set(accessToken);
+
+    let timeout;
+
+    async function get_new_tok() {
+      let access_token = await get_refresh(refreshToken);
+      let new_timeout = calculate_timeout_time(jwt_decode(access_token).exp);
+
+      console.log(`New token expires in ${new_timeout}ms`);
+
+      set(access_token)
+      localStorage.setItem('accessToken', access_token);
+      timeout = setTimeout(() => get_new_tok(), new_timeout);
+    }
+
+    timeout = setTimeout(() => get_new_tok(), calculate_timeout_time(jwt_decode(accessToken).exp));
+    
+    return () => {
+      clearTimeout(timeout);
+    }
+  });
+}
+
+export function initialize_token_from_localstorage(): boolean {
+  let access = localStorage.getItem('accessToken');
+  let refresh = localStorage.getItem('refreshToken');
+
+  function is_token_valid(tok: string): boolean {
+    let exp = jwt_decode(tok).exp;
+    return exp * 1000 < new Date().getTime();
+  }
+
+  if (!access || !refresh) return false;
+  if (!is_token_valid(access)) return false;
+
+  _init_token(access, refresh);
+
+  return true;
+}
+
+export async function initialize_token(username: string, password: string): 
+Promise<Error | undefined> {
+  let [err, { accessToken, refreshToken } ] = await get_tokens(username, password);
+
+  if (err) return err;
+
+  _init_token(accessToken, refreshToken);
+
+  return null;
+}
+
+export async function register_user(username: string, real_name: string, password: string) {
+  let req = await fetch(`${window.location.origin}/auth/signup`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username,
+      password,
+      real_name
+    })
+  });
 }
 
 // Get a authenticated socket.io client instance

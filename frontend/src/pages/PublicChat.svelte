@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { token } from "../stores";
-    import { getSIOClient } from "../api/apiClient";
+    import { getSIOClient, tokenReadable } from "../api/apiClient";
   import MessageList from "../componets/MessageList.svelte";
   import CreatePostBar from "../componets/CreatePostBar.svelte";
   import { navigateTo } from 'svelte-router-spa'
 
-    let socket = $token != null ? getSIOClient($token) : null;
+    let socket = $tokenReadable != null ? getSIOClient($tokenReadable) : null;
 </script>
 
 {#if socket != null}

@@ -3,6 +3,10 @@ import { Response } from 'express';
 import { AuthInfoDTO, SignupInfoDTO } from './user.dto';
 import { AuthService } from './auth.service';
 
+class RefreshDTO {
+  refreshToken: string;
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -26,5 +30,17 @@ export class AuthController {
     await this.authService.register(body.username, body.password, body.real_name);
 
     res.status(200).send("Ok");
+  }
+
+  @Post("refresh")
+  async refreshToken(
+    @Body() body: RefreshDTO,
+    @Res() res: Response
+  ){
+    let newTok = await this.authService.refresh(body.refreshToken);
+
+    if (!newTok) res.status(403).send("Invalid token");
+
+    res.status(200).send({ accessToken: newTok })
   }
 }
