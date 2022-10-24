@@ -5,6 +5,7 @@ import Signup from "./pages/Signup.svelte";
 import PrivateMessages from "./pages/PrivateMessages.svelte";
 import VideoStreamer from "./pages/VideoStreamer.svelte";
 import PublicChat from "./pages/PublicChat.svelte";
+import AdminPanel from "./pages/AdminPanel.svelte";
 
 export const routes = [
     {
@@ -31,5 +32,9 @@ export const routes = [
     {
         name: "/streamer",
         component: VideoStreamer
+    },
+    {
+        name: "/admin",
+        component: AdminPanel
     }
 ]

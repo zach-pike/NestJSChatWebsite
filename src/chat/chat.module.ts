@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   providers: [ChatGateway, ChatService],
   controllers: [ChatController],
-  imports: [AuthModule]
+  imports: [AuthModule],
+  exports: [ChatGateway]
 })
 export class ChatModule {}

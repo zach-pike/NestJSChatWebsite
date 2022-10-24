@@ -32,14 +32,19 @@ export class ChatGateway {
     let user = this.authService.checkJWTBearer(auth);
     if (user == null) return;
 
-    this.server.emit('message', {
+    let id = await this.chatService.addMessage({
       author: user.username,
       content
     });
 
-    await this.chatService.addMessage({
+    this.server.emit('message', {
       author: user.username,
-      content
+      content,
+      id
     });
+  }
+
+  triggerRefetch() {
+    this.server.emit("message_refetch", null);
   }
 }
