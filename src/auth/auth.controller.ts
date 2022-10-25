@@ -22,17 +22,17 @@ export class AuthController {
     return res.status(200).send(tok);
   }
 
-  @Post("signup")
+  @Post('signup')
   async postSignup(
     @Body() body: SignupInfoDTO,
     @Res() res: Response
   ) {
     await this.authService.register(body.username, body.password, body.real_name);
 
-    res.status(200).send("Ok");
+    res.status(200).send({});
   }
 
-  @Post("refresh")
+  @Post('refresh')
   async refreshToken(
     @Body() body: RefreshDTO,
     @Res() res: Response

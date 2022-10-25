@@ -8,7 +8,7 @@
 
     async function sign_up() {
         if (password_1 == password_2) {
-            await api.register_user(username, real_name, password_1);
+            await api.registerUser(username, real_name, password_1);
         }
     }
 

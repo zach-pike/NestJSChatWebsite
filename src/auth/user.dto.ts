@@ -25,3 +25,5 @@ export interface User {
   password_hash: string;
   admin: boolean;
 }
+
+export type UserWOPH = Omit<User, 'password_hash'> & { uuid: string };

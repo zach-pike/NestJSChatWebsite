@@ -12,12 +12,17 @@ class DelPubMessageDTO {
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
-    @Post("delPubMessage")
+    @Post('delPubMessage')
     async delPubMessage(
         @Body() body: DelPubMessageDTO
     ) {
         await this.adminService.delPubMessage(body.postId);
 
-        return "Ok";
+        return {};
+    }
+
+    @Get('getAllUsers')
+    async getAllUsers() {
+        return await this.adminService.getAllUsers();
     }
 }

@@ -6,6 +6,7 @@ import PrivateMessages from "./pages/PrivateMessages.svelte";
 import VideoStreamer from "./pages/VideoStreamer.svelte";
 import PublicChat from "./pages/PublicChat.svelte";
 import AdminPanel from "./pages/AdminPanel.svelte";
+import BasicLayoutRoute from "./Layouts/BasicLayoutRouter.svelte";
 
 export const routes = [
     {
@@ -26,7 +27,7 @@ export const routes = [
         component: PublicChat
     },
     {
-        name: "/pms",
+        name: "/pm",
         component: PrivateMessages
     },
     {
@@ -35,6 +36,7 @@ export const routes = [
     },
     {
         name: "/admin",
-        component: AdminPanel
+        component: AdminPanel,
+        layout: BasicLayoutRoute
     }
 ]

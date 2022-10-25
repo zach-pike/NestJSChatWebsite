@@ -1,47 +1,43 @@
 import jwt_decode from "jwt-decode"
 import { io, Socket } from 'socket.io-client';
-import { writable, readable, type Readable } from 'svelte/store';
+import { navigateTo } from "svelte-router-spa";
+import { readable, type Readable } from 'svelte/store';
 import type { Post } from '../../../src/chat/chat.types';
+import { basicJsonPostRequest } from "./requestFunctions"
 
 type Tokens = { accessToken:string, refreshToken:string };
 
-export function get_user(token: string): { username: string, admin: boolean } {
-  return jwt_decode(token);
+type JWTValues<T> = T & { exp: number; }; 
+
+type UserObject = {
+  username: string;
+  admin: boolean;
+  uuid: string;
 }
 
-async function get_tokens(username: string, password: string): Promise<[ Error, Tokens ]> {
-  let req = await fetch(`${window.location.origin}/auth/login`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username,
-      password
-    })
-  });
-
-  if (!req.ok) {
-    return [ new Error(await req.text()), null ];
+// Decode a JWT to a object
+export function jwtDecode<T = UserObject>(token: string): JWTValues<T> {
+  try {
+    return jwt_decode<JWTValues<T>>(token);
+  } catch(e) {
+    return null;
   }
-
-  return [ null, await req.json() ];
 }
 
-async function get_refresh(refreshToken: string): Promise<string> {
-  let req = await fetch(`${window.location.origin}/auth/refresh`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      refreshToken
-    })
-  })
+// Login function, returns either a Error or a `Tokens` object.
+async function getTokens(username: string, password: string): Promise<[ Error, Tokens ]> {
+  let [ err, tokens ] = await basicJsonPostRequest<Tokens>('auth/login', { username, password });
+  return err ? [ err, null ] : [ null, tokens ];
+}
 
-  let json = await req.json();
+async function getRefresh(refreshToken: string): Promise<[ Error, string ]> {
+  let [ err, { accessToken }] = await basicJsonPostRequest<{ accessToken: string }>('auth/refresh', { refreshToken });
 
-  return json.accessToken;
+  return [ err, accessToken ];
+}
+
+export function deleteLocalstorageTokens() {
+  localStorage.clear();
 }
 
 export let tokenReadable: Readable<string> = null;
@@ -50,7 +46,7 @@ function _init_token(accessToken: string, refreshToken: string) {
   localStorage.setItem('accessToken', accessToken);
   localStorage.setItem('refreshToken', refreshToken);
   
-  function calculate_timeout_time(exp: number): number {
+  function calculateTokenTimeLeft(exp: number): number {
     return ((exp * 1000) - new Date().getTime()) - 60000;
   }
   
@@ -59,18 +55,20 @@ function _init_token(accessToken: string, refreshToken: string) {
 
     let timeout;
 
-    async function get_new_tok() {
-      let access_token = await get_refresh(refreshToken);
-      let new_timeout = calculate_timeout_time(jwt_decode(access_token).exp);
+    async function getNewTok() {
+      let [ error, access_token ] = await getRefresh(refreshToken);
+      if (error) throw error;
+
+      let new_timeout = calculateTokenTimeLeft(jwtDecode(access_token).exp);
 
       console.log(`New token expires in ${new_timeout}ms`);
 
       set(access_token)
       localStorage.setItem('accessToken', access_token);
-      timeout = setTimeout(() => get_new_tok(), new_timeout);
+      timeout = setTimeout(() => getNewTok(), new_timeout);
     }
 
-    timeout = setTimeout(() => get_new_tok(), calculate_timeout_time(jwt_decode(accessToken).exp));
+    timeout = setTimeout(() => getNewTok(), calculateTokenTimeLeft(jwtDecode(accessToken).exp));
     
     return () => {
       clearTimeout(timeout);
@@ -78,26 +76,29 @@ function _init_token(accessToken: string, refreshToken: string) {
   });
 }
 
-export function initialize_token_from_localstorage(): boolean {
+export function initTokenFromLocalStorage(): boolean {
   let access = localStorage.getItem('accessToken');
   let refresh = localStorage.getItem('refreshToken');
 
   function is_token_valid(tok: string): boolean {
-    let exp = jwt_decode(tok).exp;
-    return exp * 1000 < new Date().getTime();
+    let exp = jwtDecode(tok).exp;
+    return (exp * 1000) > new Date().getTime();
   }
 
   if (!access || !refresh) return false;
+  console.log("Access token and refresh not null");
+
   if (!is_token_valid(access)) return false;
+  console.log("Access token valid")
 
   _init_token(access, refresh);
 
   return true;
 }
 
-export async function initialize_token(username: string, password: string): 
+export async function initializeToken(username: string, password: string): 
 Promise<Error | undefined> {
-  let [err, { accessToken, refreshToken } ] = await get_tokens(username, password);
+  let [err, { accessToken, refreshToken } ] = await getTokens(username, password);
 
   if (err) return err;
 
@@ -106,18 +107,10 @@ Promise<Error | undefined> {
   return null;
 }
 
-export async function register_user(username: string, real_name: string, password: string) {
-  let req = await fetch(`${window.location.origin}/auth/signup`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username,
-      password,
-      real_name
-    })
-  });
+export async function registerUser(username: string, real_name: string, password: string): Promise<Error | undefined> {
+  let [ err, _resp ] = await basicJsonPostRequest<{}>('auth/signup', { username, real_name, password });
+
+  return err;
 }
 
 // Get a authenticated socket.io client instance
@@ -166,17 +159,4 @@ export function getMessageReadable(client: Socket, token: string): Readable<Post
 
 export function sendMessage(io: Socket, msg: string) {
   io.emit('message', msg);
-}
-
-export async function delete_public_post(token: string, postId: string) {
-  let req = await fetch(`${window.location.origin}/admin/delPubMessage`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      postId
-    })
-  })
 }

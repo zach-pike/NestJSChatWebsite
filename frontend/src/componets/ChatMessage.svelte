@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { delete_public_post, tokenReadable, get_user } from "../api/apiClient"
+    import { tokenReadable, jwtDecode, deleteLocalstorageTokens } from "../api/apiClient"
+    import { deletePublicPost } from "../api/adminApi"
+  import { navigateTo } from "svelte-router-spa";
 
     export let author: string;
     export let content: string;
@@ -7,11 +9,15 @@
 
     let tbd = false;
 
-    let user = get_user($tokenReadable);
+    let user = jwtDecode($tokenReadable);
   
     async function delete_post() {
         tbd = true;
-        await delete_public_post($tokenReadable, id);
+        let err = await deletePublicPost($tokenReadable, id);
+        if (err) {
+            deleteLocalstorageTokens();
+            navigateTo('/');
+        }
         tbd = false;
     }
 </script>
