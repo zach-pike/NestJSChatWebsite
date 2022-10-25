@@ -12,7 +12,7 @@
     }
 </script>
 
-<div>
+<div class="h-full">
     <button on:click={() => fetchUsers()}>Fetch users</button>
 
     <div>
